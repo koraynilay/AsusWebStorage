@@ -2,7 +2,7 @@ import uuid
 import time
 import hashlib
 import hmac
-from urllib.parse import quote
+from urllib2 import quote
 from getpass import getpass
 import requests
 from lxml import etree
@@ -17,7 +17,7 @@ class odict(OrderedDict):
                     return _str(x[0])
                 return "\n"+"\n".join(_str(y).replace("\n", "\n\t") for y in x)
             return str(x) 
-        return "ODICT:\n" + "\n".join("\t%s: %s"%(k,_str(v).replace("\n", "\n\t")) for k,v in self.items())
+        return "ODICT:\n" + "\n".join("\t%s: %s"%(k,_str(v).replace("\n", "\n\t")) for k,v in self.iteritems())
     def _repr_html_(self):
         def _html(x):
             if isinstance(x,list):
@@ -28,7 +28,7 @@ class odict(OrderedDict):
                 return x._repr_html_()
             else:
                 return str(x) 
-        return "<ul><b>ODICT</b>:" + "\n".join("<li>%s: %s</li>"%(k,_html(v)) for k,v in self.items())+"</ul>"
+        return "<ul><b>ODICT</b>:" + "\n".join("<li>%s: %s</li>"%(k,_html(v)) for k,v in self.iteritems())+"</ul>"
         
 def recursive_dict(element):
     # return element.tag, odict(map(recursive_dict,element)) or element.text
@@ -47,12 +47,12 @@ def xml_to_dict(xmlstr):
     try:
         return recursive_dict(etree.fromstring(xmlstr))
     except:
-        print("failed", xmlstr)
+        print "failed", xmlstr
 
 def recursive_xml(d, dep="  "):        
         return "\n".join("%s<%s>%s</%s>"%(dep,  k, 
                                                                 ("\n"+recursive_xml(v, dep+"  ") if isinstance(v, dict) else v), 
-                                                                k) for k,v in list(d.items()))
+                                                                k) for k,v in d.items())
             
 def dict_to_xml(d, roottag):
     return '<?xml version="1.0" encoding="utf-8"?>\n<%s>\n%s\n</%s>'%(roottag, recursive_xml(d), roottag)
@@ -87,7 +87,7 @@ class AsusWebStorage(object):
         return 'signature_method="%s",timestamp="%s",nonce="%s",signature="%s"'%(method, timestamp, nonce, signature)
     
     def post(self, act, url, payload, oauth=False):
-        print("post", act, url, payload)
+        print "post", act, url, payload
         headers =  { "Cookie": "sid=%s;"%self.sid}
         if oauth:
             headers["Authorization"] = self.authString()
@@ -97,13 +97,13 @@ class AsusWebStorage(object):
         self.result = result
         status = int(result['status'][0])        
         if status != 0:            
-            print("url="+url, "act="+act, "rootname="+rootname)
-            print("DATA:")
-            print(data)
+            print "url="+url, "act="+act, "rootname="+rootname
+            print "DATA:"
+            print data
             if status in ERROR_MSG:                
-                print("Error:", ERROR_MSG[status])
+                print "Error:", ERROR_MSG[status]
             else:
-                print("Error: code=%d"%status)
+                print "Error: code=%d"%status
             return status, None
         return status, result    
 
@@ -160,7 +160,7 @@ class AsusWebStorage(object):
         url = self.inforelay + "folder/%s/"%act
         payload = self.props("token", "userid") + arg_props(locals(), "rawfoldername")
         status, result = self.post(act, url, payload)
-        if status == 0:
+        if status is 0:
             return result['folderid'][0]
         
     def getlatestchangefiles(self, top=None, targetroot="-5", sortdirection=0):
@@ -168,7 +168,7 @@ class AsusWebStorage(object):
         url = self.inforelay + "file/%s/"%act
         payload = self.props("token", "userid") + arg_props(locals(), "top", "targetroot", "sortdirection")
         status, result = self.post(act, url, payload)
-        if status == 0:
+        if status is 0:
             return result['entry', isdi]
     def getallchangeseq(self):
     
@@ -176,7 +176,7 @@ class AsusWebStorage(object):
         url = self.inforelay + "fsentry/%s/"%act
         payload = self.props("token") 
         status, result = self.post(act, url, payload)
-        if status == 0:
+        if status is 0:
             return result
         
     def getentryinfo(self, isfolder, entryid):
@@ -184,7 +184,7 @@ class AsusWebStorage(object):
         url = self.inforelay + "fsentry/%s/"%act
         payload = self.props("token") + arg_props(locals(), "isfolder", "entryid")
         status, result = self.post(act, url, payload)
-        if status == 0:
+        if status is 0:
             return result
         
     def propfind(self, parent, find, type="system.unknown", isshared=None):
@@ -193,7 +193,7 @@ class AsusWebStorage(object):
         find = find.encode("base64").strip("\n")
         payload = self.props("token", "userid") + arg_props(locals(), "parent", "find", "type", "isshared")
         status, result = self.post(act, url, payload)
-        if status == 0:
+        if status is 0:
             return result
         
     def directdownload(self, fid, start, end):
@@ -208,7 +208,7 @@ class AsusWebStorage(object):
         url = self.inforelay + "folder/%s/"%act
         payload = self.props("userid", "token")
         status, result = self.post(act, url, payload)
-        if status == 0:
+        if status is 0:
             return result["id"][0]
     
     

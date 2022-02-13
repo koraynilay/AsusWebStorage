@@ -1,0 +1,72 @@
+--- AsusWebStorage.py	(original)
++++ AsusWebStorage.py	(refactored)
+@@ -2,7 +2,7 @@
+ import time
+ import hashlib
+ import hmac
+-from urllib2 import quote
++from urllib.parse import quote
+ from getpass import getpass
+ import requests
+ from lxml import etree
+@@ -17,7 +17,7 @@
+                     return _str(x[0])
+                 return "\n"+"\n".join(_str(y).replace("\n", "\n\t") for y in x)
+             return str(x) 
+-        return "ODICT:\n" + "\n".join("\t%s: %s"%(k,_str(v).replace("\n", "\n\t")) for k,v in self.iteritems())
++        return "ODICT:\n" + "\n".join("\t%s: %s"%(k,_str(v).replace("\n", "\n\t")) for k,v in self.items())
+     def _repr_html_(self):
+         def _html(x):
+             if isinstance(x,list):
+@@ -28,7 +28,7 @@
+                 return x._repr_html_()
+             else:
+                 return str(x) 
+-        return "<ul><b>ODICT</b>:" + "\n".join("<li>%s: %s</li>"%(k,_html(v)) for k,v in self.iteritems())+"</ul>"
++        return "<ul><b>ODICT</b>:" + "\n".join("<li>%s: %s</li>"%(k,_html(v)) for k,v in self.items())+"</ul>"
+         
+ def recursive_dict(element):
+     # return element.tag, odict(map(recursive_dict,element)) or element.text
+@@ -47,12 +47,12 @@
+     try:
+         return recursive_dict(etree.fromstring(xmlstr))
+     except:
+-        print "failed", xmlstr
++        print("failed", xmlstr)
+ 
+ def recursive_xml(d, dep="  "):        
+         return "\n".join("%s<%s>%s</%s>"%(dep,  k, 
+                                                                 ("\n"+recursive_xml(v, dep+"  ") if isinstance(v, dict) else v), 
+-                                                                k) for k,v in d.items())
++                                                                k) for k,v in list(d.items()))
+             
+ def dict_to_xml(d, roottag):
+     return '<?xml version="1.0" encoding="utf-8"?>\n<%s>\n%s\n</%s>'%(roottag, recursive_xml(d), roottag)
+@@ -87,7 +87,7 @@
+         return 'signature_method="%s",timestamp="%s",nonce="%s",signature="%s"'%(method, timestamp, nonce, signature)
+     
+     def post(self, act, url, payload, oauth=False):
+-        print "post", act, url, payload
++        print("post", act, url, payload)
+         headers =  { "Cookie": "sid=%s;"%self.sid}
+         if oauth:
+             headers["Authorization"] = self.authString()
+@@ -97,13 +97,13 @@
+         self.result = result
+         status = int(result['status'][0])        
+         if status != 0:            
+-            print "url="+url, "act="+act, "rootname="+rootname
+-            print "DATA:"
+-            print data
++            print("url="+url, "act="+act, "rootname="+rootname)
++            print("DATA:")
++            print(data)
+             if status in ERROR_MSG:                
+-                print "Error:", ERROR_MSG[status]
++                print("Error:", ERROR_MSG[status])
+             else:
+-                print "Error: code=%d"%status
++                print("Error: code=%d"%status)
+             return status, None
+         return status, result    
+ 

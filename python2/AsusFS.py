@@ -64,13 +64,13 @@ class AsusFS(LoggingMixIn, Operations):
     def getattr(self, path, fh=None):
         if path in self._attr_cache:
             return self._attr_cache[path]
-        print("getattr", path)
+        print "getattr", path
         _id, isdir = self.path_to_id(path)
         if _id is None:             
-            print("getattr not found", path)            
+            print "getattr not found", path            
             raise FuseOSError(ENOENT)
         result = self.aws.getentryinfo(isdir==S_IFDIR, _id)
-        st ={ "st_mode": isdir|0o755, "st_uid": self.uid, "st_gid":self.gid}
+        st ={ "st_mode": isdir|0755, "st_uid": self.uid, "st_gid":self.gid}
         if isdir == S_IFREG and 'filesize' in result:
             st['st_size']=int(result['filesize'][0])
         if isdir == S_IFDIR:
@@ -83,7 +83,7 @@ class AsusFS(LoggingMixIn, Operations):
         return st
     
     def read(self, path, size, offset, fh):
-        print("read", path, size, offset, fh)
+        print "read", path, size, offset, fh
         _id, isdir = self.path_to_id(path)
         if isdir == S_IFDIR:
             raise FuseOSError(EFAULT)
@@ -93,10 +93,10 @@ class AsusFS(LoggingMixIn, Operations):
         return rtn
                   
     def readdir(self, path, fh):
-        print("readdir path=", path)
+        print "readdir path=", path
         _id, isdir = self.path_to_id(path)
         if _id is None or isdir != S_IFDIR:
-            print("readdir not found", path, _id, isdir)
+            print "readdir not found", path, _id, isdir
             raise FuseOSError(ENOENT)
         rtn = self.aws.browsefolder(_id)
         folders, files = rtn.get("folder", []), rtn.get("file", [])
@@ -118,8 +118,8 @@ class AsusFS(LoggingMixIn, Operations):
 
 
 if __name__ == '__main__':
-     if len(argv) != 2:
+    if len(argv) != 2:
         print('usage: %s <mountpoint>' % argv[0])
         exit(1)
-     print("starting fuse")
-     fuse = FUSE(AsusFS(sid, progKey, userid, password), argv[1], foreground=True, ro=True)
+    print "starting fuse"
+    fuse = FUSE(AsusFS(sid, progKey, userid, password), argv[1], foreground=True, ro=True)
