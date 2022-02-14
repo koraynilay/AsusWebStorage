@@ -7,7 +7,8 @@ from getpass import getpass
 import requests
 from lxml import etree
 from collections import OrderedDict
-SERVICE_PORTAL = "https://sp.yostore.net/"
+#SERVICE_PORTAL = "https://sp.yostore.net/"
+SERVICE_PORTAL = "https://sgd05.asuswebstorage.com/"
 
 class odict(OrderedDict):
     def __str__(self):        
@@ -92,7 +93,10 @@ class AsusWebStorage(object):
         if oauth:
             headers["Authorization"] = self.authString()
         data = dict_to_xml(odict(payload), act)
+        print("data:\n", data)
+        print("headers:\n", headers)
         self.last_response  = self.session.post(url, data=data, headers=headers)        
+        print("resp:\n", self.last_response)
         rootname, result = xml_to_dict(self.last_response.content) 
         self.result = result
         status = int(result['status'][0])        
