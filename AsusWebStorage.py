@@ -126,8 +126,8 @@ class AsusWebStorage(object):
     
     def acquiretoken(self):        
         act = "aaa"
-        url = self.gateway + "member/requesttoken/"
-        payload = self.props ('userid', 'password')
+        url = self.gateway + "member/acquiretoken/"
+        payload = self.props ('userid', 'password', 'time')
         
         status, result = self.post(act, url, payload, oauth=True)
         if not status:
